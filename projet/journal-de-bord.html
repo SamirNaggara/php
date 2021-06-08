@@ -1,0 +1,177 @@
+<h2>Etape 1 : Creation de la BDD</h2>
+
+<p>Nous creons dans un premier temps uniquement la table membre (mais dans un vrai projet, vous pouvez creer toutes vos bases d'un coup.)</p>
+<p>Il dois y avoir au moins une clef primaire. Ici c'est id_membre, qui sera auto incrémenté</p>
+<p>Le champ code_postal possède l'attribut "unsigned zerofill", afin de garder les numeros 0 à gauche. Cela permettra de garder le format 01300 plutot que 1300</p>
+<p>Le statut est un entier, qui par défaut est null. On le passera manuellement a 1 pour les membres qui sont administrateurs</p>
+
+
+<h2>Etape 2 : Une première arborescence des fichiers</h2>
+
+<p>Les pages : Index.php (page d'accueil), connexion.php, inscription.php et profil.php</p>
+<p>Le dossier inc, avec head.inc.php, header.inc.php, footer.inc.php, function.inc.php, init.inc.php</p>
+<p>Le dossier asset : Un dossier CSS avec le style, un dossier images, et un dossier JS avec nos scripts.</p>
+<p>Le dossier admin, avec toutes les pages uniquement dédiées aux administrateurs. Pour l'instant, on a juste gestion-membre.php</p>
+<h2>Etape 3</h2>
+
+
+<h3>Etape 3</h3>
+<p>Nous appliquons du code dans les inc.
+    Ces codes seront appelées dans toutes les pages
+</p>
+<p>Page Init.inc.php : On fais la connexion a la bdd, on initie la session (qui dois être initialisé à chaque nouvelles pages), on initie la variable $msg (qu'on utilisera pour passer tout nos messages d'erreurs.
+    On utilise aussi la constante URL, qui nous permet de stocker l'URL du projet. On pourra venir la changer quand c'est necessaire
+</p>
+<p>
+    Page head.inc.php : 
+    On place ici tout notre head, jusqu'a l'ouverture de body. 
+    Attention, pour la favicon et pour le style, et pour tout ce qui est lien, on peux faire attention au chemin donnée.
+    Si on donne un chemin relatif, selon le fichier dans lequel on l'ouvre le lien pourrait ne pas fonctionner.
+    On utilise donc la constante URL pour faire des liens absolue
+</p>
+<p>Header.inc.php : 
+    On met notre navigation. C'est la navigation qui apparaitra sur toute les pages (on peux la faire rapidement avec bootstrap).
+    Au debut on met toutes les pages, mais par la suite on pourra utiliser du PHP pour que le menu qui apparait sois différent selon si la personne est connecté ou non, et si elle est admin ou non
+</p>
+<p>
+    Page footer.inc.php :
+    On met les scripts, la balises body fermante, et la balise html fermante
+</p>
+<p>
+    Page function.inc.php : 
+    On y mettra toutes les fonctions que l'on veut avoir sur tout le site. (pour l'instant, on a pas grand chose, a part peut-être une fonction debug($liste) qui fait un écho, pre, prin_r($liste) a notre place) 
+</p>
+<p>
+    Ajout des include_once -> Dans les pages du sites, on appel tout les fichiers inc.
+
+    L'ordre est important.
+
+    On appel en premier le init.inc.php, puis function.inc.php 
+    Si on a du traitement PHP sur la page, on le place ici.
+
+    Ensuite on appel head.inc.php, puis header.inc.php 
+
+    Ensuite on peux placer le code html de notre page, dans un main. 
+
+    Et enfin a la fin, le footer.inc.php
+</p>
+<p>
+    Page inscription.php : 
+    On a bien ajouté les incs dedans.
+
+    1er étape : Formulaire HTML
+    On fait le formulaire avec tout les champs.
+        On peux s'aider de bootstrap pour que ce soit élégant facilement, mais il faut savoir qu'on pourra toujours reprendre le style plus tard.
+        Il faut faire attention a avoir des name partout
+
+    2ieme étape : Les issets
+        On met en plce les if isset et les if empty, afin de faire le traitement du formulaire si et seulement si tout les champs sont remplis.
+        Souvent, il y a une petite faute dans la ligne, donc avant d'enregistrer les valeurs contenues dans POST, il faut vérifier que vous rentrez bien dans la boucle.
+
+        Pour ça, faite un echo pré de POST, et faite un echo "Je suis bien dans la condition", que vous pouvez placer dans le if.
+
+        Ensuite, vous enregistrez toutes les valeurs de Post, dans une variable 
+
+    3ieme étape : Les tests
+        Il peux y avoir beaucoup de choses a tester avant d'enregistrer les données dans la bdd.
+        La longueurs des champs, ou peut etre qu'ils doivent être unique, ou ne pas contenir de caractere spéciaux.
+        Vous utilisez des if, et à chaque fois que vous relevez une erreur, vous ecrivez dans la variable $msg, avec un message d'avertissement pour l'erreur
+
+    4ieme étape : L'enregistrement
+
+        Vous faites une condition pour ne faire l'enregisterment que si la variable est vide.
+        Vous utilisez de préférence un prepare, vous enregistrez les donées, et si l'enregistrement a fonctionné, alors seulement, vous pouvez envoyer un message de succes (ou rediriger vers une autre page).
+
+        Pour la redirection a une autre page, vous pouvez utilisez un header location, sauf que en plus de renvoyer vers la page de connexion, vous pouvez ajouter dans l'URL ?message=success.
+
+        Ensuite, dans la page de connexion, vous pouvez faire un if isset de get message, et verifié qu'il est bien egale a success, et si c'est le cas, envoyer votre message de succes
+
+
+
+        Astuce :    - Trim() permet d'enlever les espaces vides au debut et a la fin de la chaine
+                    - pregmatch("pattern", $chaine) permet de vérifier que la chaine suis bien un pattern bien défini.
+                    Par exemple qu'il n'est bien constitué que de chiffres, ou sans majuscule, etc.
+                    Les pattern sont des expressions pas évidentes à maitriser qu'on appel des "REGEX". Vous pouvez en trouver des exemples sur internet
+
+                    $mdp_crypte = password_hash($mdp, PASSWORD_DEFAULT); permet de crypter votre mdp de façon simple. Dans mdp_crypte est alors enregistré une chaine de caractère incompréhensible et indechiffrable.
+                    
+                    
+
+
+</p>
+<h2>La page de connexion</h2>
+    <p>Il s'agit de rendre possible la connexion.</p>
+    <p>I faut pour cela faire un formulaire, avec le pseudo et le mdp. Ensuite on recupere les données, et on les tests, voir si le pseudo existe bien, et voir si le mdp correspond bien au pseudo.
+
+        Pour tester si le pseudo existe bien, on fais une requete qui nous affiche (SELECT) seulement les lignes ou le pseudo est égal au pseudo envoyé dans le formulaire par l'utilisateur.
+        Si on nous renvoie une ligne, c'est qu'on a bien trouvé, donc c'est ok, pas de message d'erreur, on peux continuer l'enregistrement.
+
+        En revanche, si on nous renvoie 0 lignes (on test avec rowCount()), donc le pseudo n'existe pas, et on envoie un message d'erreur
+
+        Pour verifier le mdp, il faut utiliser la fonction password_verify($mdp_connexion, $mdp) , qui permet de vérifier que le mdp donnée par l'utilisateur et celui enregistré dans la base de donnée est bien le bon.
+
+        Pour cela, il faut recuperer la valeur du mdp dans la base de donnée, ce qu'on peux faire en utilisant la requete d'avant
+    </p>
+    <p>Il faut ensuite enregistrer les infos de l'utilisateur dans Session. Si la session existe, alors ça veux dire que l'utilisateur est connecté</p>
+
+    <p>On peux ensuite mettre une redirection sur la page profil, mais la page profil doit être accesible uniquement par ceux qui sont connectés. Pour cela on fait un isset de Session, et si la session n'existe pas, on fais une redirection, </p>
+
+
+    <h2>La page de profil</h2>
+
+    <p>Afficher la page de profil consiste a aller chercher dans la base de donnée les bonnes infos, puis les afficher correctement dans le html</p>
+    <p>Dans un premier temps, on fais la requete sql, soit avec query, soit avec prepare</p>
+    <p>Ensuite on fetche les resultats, on les stocks dans des variables.
+
+        Dans le HTML, on peux alors afficher chacune de ces variable de la façon qu'on veux
+    </p>
+
+    <h2>La modifier modifier le profil</h2>
+
+    <p>Elle ressemble à la page d'avant. On fais la meme requete et on obtiens les même infos, sauf qu'au lieu de les affichier dans une liste, on les affiche dans l'attribue vaulue du formulaire
+        Il faut donc dans un premier temps creer un formulaire avec tout les champs du profil, pour inserer dans value les valeurs qu'on a recuperer de la base de donnée
+
+
+        Ensuite, il faut enregistrer dans des variables les données recuperer par le formulaire.
+
+        Dans le if isset. Pour ne pas melanger les variable, on utilise ici un suffix "enr_". 
+
+        Ensuite on peut faire toutes nos vérifications par rapport à nos champs... 
+
+        Et ensuite proceder a l'enregistrement s'il n'y a pas eu d'erreur.
+
+        La requete de l'enregistrement est un UPDATE, et si l'enregistrement s'est bien passé, alors on envoie un message de succes (avec une redirection sur la meme page et avec un get message a l'interieur)
+    </p>
+
+    <h2>La connexion</h2>
+
+    <p>Au moment de la connexion, nous avons enregistré dans session l'information que l'utilisateur est bien connecté, et probablement aussi, toutes ses informations de la table membre
+
+        Dans functions.inc.php nous pouvons créer une fonction is_connected, qui enverra true si l'utilisateur est connecté (donc si la session existe) et false sinon
+
+        Ensuite, dans chaque page, nous pouvons nous demander si cette page accesible que au membres connecté, ou au contraire que aux membres non connectés, ou aux deux.
+
+        Au debut de la page, on fais donc un if (is_connected()), ou if (!is_connected()), et a l'interieur on peut placer une redirection vers la page souhaiter avec header location, avec la fonction exit() derrière pour être sur que le code ne sois pas executé derrire 
+
+
+        Pour savoir qui est administrateur, on a dans la table membre la colonne "statut", qui vaut 1 si la personne est admin, mais 0 par defaut.
+
+        On peux donc creer une fonction is_admin_connected, qui va verifier si la personne est bien connecté, et qui va verifier si la personne est bien admin.
+        Bien sur, dans connexion, on aura stocké dans la SESSION la valeur de la colonne statut.
+
+        Ensuite dans la page gestion-membres.php, on peux tranquilement faire en sorte que seul les admins y aient acces
+    </p>
+
+    <h2>Les menus</h2>
+
+    <p>
+        Dans header.inc.php, on peux faire en sorte que chaque menu s'affiche uniquement si la personne est connecté, ou bien si elle est admin, ou bien si elle est non connecté. 
+
+        Pour cela, il suffit d'utiliser un conditionnel, et de faire apparaitre le menu si et seulement si la condition est bien vérifié. 
+
+        On utilisera nos fonction is_connected et is_admin_connected 
+
+        Note -> Le conditionnel peut être exprimer avec un simple if, ou sous sa forme ternaire, avec le ?
+
+        echo (test) ? "Resultat si vrai" : "Resultat si faux";
+    </p>
